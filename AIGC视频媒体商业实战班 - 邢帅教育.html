@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的私人导航 | My Favorites</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --border-radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; padding-bottom: 40px; }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 60px 20px 40px;
+            text-align: center;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 800; }
+        header p { opacity: 0.9; margin-bottom: 30px; }
+
+        /* 搜索框 */
+        .search-container { max-width: 600px; margin: 0 auto; position: relative; }
+        #search-input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: none;
+            font-size: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            outline: none;
+            transition: transform 0.2s;
+        }
+        #search-input:focus { transform: scale(1.02); }
+
+        /* 主内容区 */
+        .container { max-width: 1200px; margin: -30px auto 0; padding: 0 20px; position: relative; z-index: 10; }
+
+        /* 分类标题 */
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 40px 0 20px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: var(--primary-color);
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #f9fafb;
+            flex-shrink: 0;
+        }
+        .card-info h3 { font-size: 1rem; margin-bottom: 4px; font-weight: 600; }
+        .card-info p { font-size: 0.85rem; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* 无结果提示 */
+        .no-result { text-align: center; padding: 40px; color: var(--text-sub); display: none; grid-column: 1 / -1; }
+
+        @media (max-width: 640px) {
+            header h1 { font-size: 1.8rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🚀 我的效率工具箱</h1>
+    <p>精选优质资源，一键直达</p>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="搜索工具、网站或关键词..." autocomplete="off">
+    </div>
+</header>
+
+<div class="container" id="app">
+    <!-- 内容将由 JS 动态渲染 -->
+    <div class="no-result" id="no-result">😕 没有找到相关内容，试试其他关键词吧</div>
+</div>
+
+<script>
+    // ==========================================
+    // 🟢 在这里配置你的网站数据 (修改这里即可)
+    // ==========================================
+    const DATA = [
+        {
+            category: "🤖 AI 工具",
+            items: [
+                { name: "ChatGPT", url: "https://chat.openai.com", desc: "全球最强大的AI对话模型" },
+                { name: "Midjourney", url: "https://www.midjourney.com", desc: "顶尖的AI绘画工具" },
+                { name: "Notion AI", url: "https://www.notion.so", desc: "集成在笔记中的智能写作助手" },
+                { name: "Gamma", url: "https://gamma.app", desc: "AI一键生成精美PPT" }
+            ]
+        },
+        {
+            category: "🎨 设计素材",
+            items: [
+                { name: "Figma", url: "https://www.figma.com", desc: "在线协作UI设计神器" },
+                { name: "Unsplash", url: "https://unsplash.com", desc: "免费高清无版权图库" },
+                { name: "IconPark", url: "https://iconpark.oceanengine.com", desc: "字节跳动开源图标库" }
+            ]
+        },
+        {
+            category: "💻 开发编程",
+            items: [
+                { name: "GitHub", url: "https://github.com", desc: "全球最大的代码托管平台" },
+                { name: "MDN Web Docs", url: "https://developer.mozilla.org", desc: "前端开发者必备文档" },
+                { name: "Vercel", url: "https://vercel.com", desc: "极速前端部署平台" }
+            ]
+        },
+        {
+            category: "📚 日常办公",
+            items: [
+                { name: "飞书文档", url: "https://www.feishu.cn", desc: "高效协同办公平台" },
+                { name: "DeepL", url: "https://www.deepl.com", desc: "比谷歌更精准的AI翻译" },
+                { name: "ProcessOn", url: "https://www.processon.com", desc: "免费在线流程图思维导图" }
+            ]
+        }
+    ];
+
+    // ==========================================
+    // 🔵 渲染逻辑 (无需修改)
+    // ==========================================
+    const app = document.getElementById('app');
+    const searchInput = document.getElementById('search-input');
+    const noResult = document.getElementById('no-result');
+
+    // 自动获取网站图标 (使用 Google Favicon API)
+    function getFavicon(url) {
+        try {
+            const domain = new URL(url).origin;
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        } catch (e) {
+            return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌐</text></svg>';
+        }
+    }
+
+    function render(filterText = '') {
+        // 清除旧内容（保留 no-result div）
+        const oldContent = app.querySelectorAll('.category-section');
+        oldContent.forEach(el => el.remove());
+
+        let hasResult = false;
+        const keyword = filterText.toLowerCase().trim();
+
+        DATA.forEach(cat => {
+            const filteredItems = cat.items.filter(item => 
+                item.name.toLowerCase().includes(keyword) || 
+                item.desc.toLowerCase().includes(keyword)
+            );
+
+            if (filteredItems.length > 0) {
+                hasResult = true;
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                
+                // 只有在没有搜索词时才显示分类标题
+                const titleHtml = keyword ? '' : `<div class="category-title">${cat.category}</div>`;
+                
+                const cardsHtml = filteredItems.map(item => `
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="card">
+                        <img class="card-icon" src="${getFavicon(item.url)}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>'">
+                        <div class="card-info">
+                            <h3>${item.name}</h3>
+                            <p>${item.desc}</p>
+                        </div>
+                    </a>
+                `).join('');
+
+                section.innerHTML = `${titleHtml}<div class="grid">${cardsHtml}</div>`;
+                app.insertBefore(section, noResult);
+            }
+        });
+
+        noResult.style.display = hasResult ? 'none' : 'block';
+    }
+
+    // 初始化渲染
+    render();
+
+    // 搜索事件监听
+    searchInput.addEventListener('input', (e) => {
+        render(e.target.value);
+    });
+</script>
+
+</body>
+</html>
